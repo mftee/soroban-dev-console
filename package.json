@@ -14,8 +14,12 @@
     "deploy:contracts": "bash scripts/deploy-test-suite.sh"
   },
   "devDependencies": {
+    "@types/stellar-sdk": "^0.11.1",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "latest"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^14.5.0"
   }
 }
