@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNetworkStore } from "@/store/useNetworkStore";
 import { rpc as SorobanRpc } from "@stellar/stellar-sdk";
 import {
@@ -16,8 +16,6 @@ export function NetworkHealth() {
   const config = getActiveNetworkConfig();
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-
     async function checkHealth() {
       const server = new SorobanRpc.Server(config.rpcUrl);
       const start = Date.now();
@@ -35,7 +33,7 @@ export function NetworkHealth() {
           latencyMs: latency,
           lastCheck: Date.now(),
         });
-      } catch (e) {
+      } catch {
         setHealth({
           status: "offline",
           latestLedger: 0,
@@ -47,7 +45,7 @@ export function NetworkHealth() {
     }
 
     checkHealth();
-    interval = setInterval(checkHealth, 30000); // Poll every 30s
+    const interval = setInterval(checkHealth, 30000); // Poll every 30s
 
     return () => clearInterval(interval);
   }, [config.rpcUrl, setHealth]);
