@@ -27,6 +27,8 @@ import {
   normalizeSimulationResult,
   type NormalizedSimulationResult,
   type NormalizedContractSpec,
+  type NormalizedContractSpec,
+  createNormalizedContractSpecFromFunctionNames,
 } from "@devconsole/soroban-utils";
 import { signTransaction } from "@stellar/freighter-api";
 import { SavedCallsSheet } from "./saved-calls-sheet";
@@ -63,6 +65,61 @@ import { toast } from "sonner";
 interface ContractCallFormProps {
   contractId: string;
 }
+
+const DEFAULT_TOKEN_SPEC: NormalizedContractSpec = {
+  contractId: "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+  source: "workspace",
+  rawSpec: "",
+  ingestedAt: Date.now(),
+  functions: [
+    {
+      name: "balance",
+      inputs: [{ name: "id", type: "address", required: true }],
+      outputs: [{ name: "balance", type: "i128", required: true }],
+    },
+    {
+      name: "decimals",
+      inputs: [],
+      outputs: [{ name: "decimals", type: "u32", required: true }],
+    },
+    {
+      name: "name",
+      inputs: [],
+      outputs: [{ name: "name", type: "string", required: true }],
+    },
+    {
+      name: "symbol",
+      inputs: [],
+      outputs: [{ name: "symbol", type: "symbol", required: true }],
+    },
+    {
+      name: "transfer",
+      inputs: [
+        { name: "from", type: "address", required: true },
+        { name: "to", type: "address", required: true },
+        { name: "amount", type: "i128", required: true },
+      ],
+      outputs: [],
+    },
+    {
+      name: "mint",
+      inputs: [
+        { name: "to", type: "address", required: true },
+        { name: "amount", type: "i128", required: true },
+      ],
+      outputs: [],
+    },
+    {
+      name: "burn",
+      inputs: [
+        { name: "from", type: "address", required: true },
+        { name: "amount", type: "i128", required: true },
+      ],
+      outputs: [],
+    },
+  ],
+};
+
 
 const DEFAULT_TOKEN_SPEC: NormalizedContractSpec = {
   contractId: "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
@@ -190,6 +247,8 @@ export function ContractCallForm({ contractId }: ContractCallFormProps) {
   const handleFnChange = (name: string) => {
     setFnName(name);
     setSimulation(null);
+    setSimulationMetrics(null);
+    setRequiredAuthKeys([]);
     const nextFunction = spec?.functions.find((entry) => entry.name === name);
 
     setArgs(nextFunction?.inputs.map(toContractArg) ?? []);
