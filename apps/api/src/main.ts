@@ -3,8 +3,10 @@ import "reflect-metadata";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module.js";
+import { validateEnv } from "./lib/validate-env.js";
 
 async function bootstrap() {
+  validateEnv();
   const app = await NestFactory.create(AppModule, {
     cors: false
   });

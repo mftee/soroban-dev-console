@@ -2,11 +2,21 @@ import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/commo
 import { PrismaService } from "../../lib/prisma.service.js";
 import { randomBytes } from "crypto";
 
-export interface CreateShareDto {
-  workspaceId: string;
+import { IsString, IsOptional, IsObject } from "class-validator";
+
+export class CreateShareDto {
+  @IsString()
+  workspaceId!: string;
+
+  @IsOptional()
+  @IsString()
   label?: string;
-  snapshotJson: Record<string, unknown>;
-  /** ISO date string — optional TTL */
+
+  @IsObject()
+  snapshotJson!: Record<string, unknown>;
+
+  @IsOptional()
+  @IsString()
   expiresAt?: string;
 }
 

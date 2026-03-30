@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useWallet } from "@/store/useWallet";
 import { useNetworkStore } from "@/store/useNetworkStore";
-import { useWasmStore } from "@/store/useWasmStore";
+import { useWasmStore, type WasmEntry } from "@/store/useWasmStore";
 import { useContractStore } from "@/store/useContractStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import {
@@ -51,7 +51,7 @@ import {
 export default function WasmRegistryPage() {
   const { isConnected, address } = useWallet();
   const { getActiveNetworkConfig } = useNetworkStore();
-  const { wasms, addWasm, removeWasm } = useWasmStore();
+  const { wasms, addWasm, removeWasm, associateContract } = useWasmStore();
   const { activeWorkspaceId, attachArtifact } = useWorkspaceStore();
   const { addContract } = useContractStore();
 
@@ -123,7 +123,9 @@ export default function WasmRegistryPage() {
         name: wasmName || file.name,
         network: network.id,
         installedAt: Date.now(),
-        functions: previewFunctions,
+        functions: previewFunctions.length > 0 ? previewFunctions : undefined,
+        parseError: previewFunctions[0] === "Parsing failed",
+        workspaceId: activeWorkspaceId,
       });
       attachArtifact(activeWorkspaceId, { kind: "wasm", id: wasmHash });
 
@@ -182,8 +184,8 @@ export default function WasmRegistryPage() {
         await new Promise((r) => setTimeout(r, 2000));
         const status = await server.getTransaction(res.hash);
         if (status.status === "SUCCESS") {
-          // Simplified status check
           toast.success("Contract Instantiated Successfully!");
+          associateContract(wasmHash, res.hash);
           break;
         }
         attempts++;
@@ -253,6 +255,8 @@ export default function WasmRegistryPage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Hash</TableHead>
+                  <TableHead>Network</TableHead>
+                  <TableHead>Deployed</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -260,7 +264,7 @@ export default function WasmRegistryPage() {
                 {wasms.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={3}
+                      colSpan={5}
                       className="h-24 text-center text-muted-foreground"
                     >
                       No WASM code uploaded yet.
@@ -273,10 +277,23 @@ export default function WasmRegistryPage() {
                         <div className="flex items-center gap-2">
                           <FileCode className="h-4 w-4 text-blue-500" />
                           {entry.name}
+                          {entry.parseError && (
+                            <Badge variant="destructive" className="text-[10px]">parse error</Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {entry.hash.slice(0, 12)}...{entry.hash.slice(-12)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-[10px]">{entry.network}</Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {entry.deployedContractId ? (
+                          <span className="font-mono">{entry.deployedContractId.slice(0, 10)}…</span>
+                        ) : (
+                          <span className="italic">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">

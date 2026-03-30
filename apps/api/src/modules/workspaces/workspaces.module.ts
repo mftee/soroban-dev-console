@@ -7,6 +7,7 @@ import { WorkspacesService } from "./workspaces.service.js";
   providers: [WorkspacesService],
 
 @Module({
-  controllers: [WorkspacesController]
+  controllers: [WorkspacesController],
+  providers: [WorkspacesService, PrismaService],
 })
 export class WorkspacesModule {}
